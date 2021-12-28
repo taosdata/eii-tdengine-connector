@@ -20,7 +20,9 @@ COPY --from=common /eii/common/util/util.go common/util/util.go
 COPY --from=common ${GOPATH}/src ${GOPATH}/src
 COPY --from=common /eii/common/libs/EIIMessageBus/go/EIIMessageBus $GOPATH/src/EIIMessageBus
 COPY --from=common /eii/common/libs/ConfigMgr/go/ConfigMgr $GOPATH/src/ConfigMgr
-COPY . ./TDengineConnector
+RUN mkdir TDengineConnector
+RUN cp /root/TDengineConnector.go ./TDengineConnector
+
 
 ENV PATH="$PATH:/usr/local/go/bin" \
     PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" \
@@ -34,9 +36,8 @@ RUN mkdir $ARTIFACTS && \
     go build -o $ARTIFACTS/TDengineConnector TDengineConnector/TDengineConnector.go
 
 WORKDIR /root
-COPY --from=builder $ARTIFACTS .
+RUN cp $ARTIFACTS/TDengineConnector .
 
 EXPOSE 6030-6042/tcp 
 EXPOSE 6030-6042/udp 
 ENTRYPOINT ["./startup.sh"]
-
