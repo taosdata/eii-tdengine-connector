@@ -11,4 +11,7 @@ ADD . /root
 RUN dpkg -i TDengine-server-2.3.5.0-beta-Linux-x64.deb
 EXPOSE 6030-6042/tcp 
 EXPOSE 6030-6042/udp 
-CMD ["/usr/local/taos/bin/taosd"]
+#CMD ["taosd"]
+#CMD ["./startup.sh"]
+ENTRYPOINT ["./startup.sh"]
+

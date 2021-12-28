@@ -5,3 +5,8 @@
 Dockerfile
 *.yml
 *_spec.json
+test.sh
+build.sh
+run.sh
+kill.sh
+inspectlog.sh
