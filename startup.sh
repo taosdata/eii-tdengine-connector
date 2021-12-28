@@ -2,3 +2,4 @@
 
 [[ -x /usr/bin/taosadapter ]] && /usr/bin/taosadapter &
 taosd
+TDengineConnector
