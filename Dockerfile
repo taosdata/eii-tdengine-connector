@@ -9,6 +9,7 @@ LABEL description="TDengineConnector image"
 WORKDIR /root
 ADD . /root
 RUN dpkg -i TDengine-server-2.3.5.0-beta-Linux-x64.deb
+RUN rm TDengine-server-2.3.5.0-beta-Linux-x64.deb
 
 WORKDIR ${GOPATH}/src/IEdgeInsights
 ARG CMAKE_INSTALL_PREFIX
@@ -32,11 +33,11 @@ ENV CGO_CFLAGS="$CGO_FLAGS -I ${CMAKE_INSTALL_PREFIX}/include -O2 -D_FORTIFY_SOU
     CGO_LDFLAGS="$CGO_LDFLAGS -L${CMAKE_INSTALL_PREFIX}/lib -z noexecstack -z relro -z now"
 
 ARG ARTIFACTS
-RUN mkdir $ARTIFACTS && \
-    go build -o $ARTIFACTS/TDengineConnector TDengineConnector/TDengineConnector.go
+#RUN mkdir $ARTIFACTS && \
+#    go build -o $ARTIFACTS/TDengineConnector TDengineConnector/TDengineConnector.go
 
 WORKDIR /root
-RUN cp $ARTIFACTS/TDengineConnector .
+#RUN cp $ARTIFACTS/TDengineConnector .
 
 EXPOSE 6030-6042/tcp 
 EXPOSE 6030-6042/udp 
