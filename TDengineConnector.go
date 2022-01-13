@@ -9,6 +9,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -24,6 +25,7 @@ var publisher *eiimsgbus.Publisher
 var subclient *eiimsgbus.MsgbusClient
 var subscriber *eiimsgbus.Subscriber
 var done = make(chan bool)
+var httpClient = http.Client{}
 
 func startEIIPublisher() {
 	pubCtx, err := cfgMgr.GetPublisherByIndex(0)
@@ -145,17 +147,29 @@ func startEIISubscriber() {
 	}
 	for {
 		msg := <-subscriber.MessageChannel
+		// Data: map[metric:electric_meter tags:map[device_id:BJ-12345] timestamp:1 value:245]
+		msg.Data["timestamp"] = time.Now().Nanosecond() / 1000000
 		bytemsg, err := json.Marshal(msg.Data)
 		if err != nil {
 			glog.Errorf("error: %s", err)
 		}
-		fmt.Println(bytemsg)
 		glog.Infof("Subscribe data received from topic: %s  Data: %v", msg.Name, msg.Data)
+		processMsg(&bytemsg)
 	}
 }
 
-func writeToTDengine(msgData string) {
-
+func processMsg(bytemsg *[]byte) {
+	req, err := http.NewRequest("POST", "http://localhost:6041/opentsdb/v1/put/json/eiidemo", bytes.NewBuffer(*bytemsg))
+	if err != nil {
+		glog.Errorf("-- Error processing message: %v\n", err)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Basic cm9vdDp0YW9zZGF0YQ==")
+	resp, err := httpClient.Do(req)
+	if resp.StatusCode != 200 {
+		glog.Errof("processMsg resp: %d %s", resp.StatusCode, resp.Status)
+	}
 }
 
 func cleanup() {
