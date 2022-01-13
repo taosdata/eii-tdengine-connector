@@ -3,15 +3,16 @@ package main
 import (
 	eiicfgmgr "ConfigMgr/eiiconfigmgr"
 	eiimsgbus "EIIMessageBus/eiimsgbus"
+	"bytes"
 	"database/sql/driver"
 	"flag"
+	"fmt"
 	"io"
+	"json"
 	"os"
+	"strconv"
 	"strings"
 	"time"
-	"bytes"
-	"fmt"
-	"strconv"
 
 	"github.com/golang/glog"
 	taos "github.com/taosdata/driver-go/v2/af"
@@ -42,7 +43,7 @@ func startEIIPublisher() {
 		glog.Error("Failed to get message bus config :%v", err)
 		return
 	}
-	pubclient, err := eiimsgbus.NewMsgbusClient(config)
+	pubclient, err = eiimsgbus.NewMsgbusClient(config)
 	if err != nil {
 		glog.Errorf("-- Error creating context: %v\n", err)
 		return
@@ -92,7 +93,7 @@ func subscribeToTDengine(dbName string, stableName string) {
 					glog.Errorf("%v\n", err)
 					break
 				}
-				var buf bytes.Buffer 
+				var buf bytes.Buffer
 				ts, ok := values[0].(time.Time)
 				if !ok {
 					continue
@@ -115,6 +116,45 @@ func subscribeToTDengine(dbName string, stableName string) {
 }
 
 func startEIISubscriber() {
+	subCtx, err := cfgMgr.ConfigMgr.GetSubscriberByIndex(0)
+	if err != nil {
+		glog.Errorf("Error occured with error:%v", err)
+		return
+	}
+	topics, err := subCtx.GetTopics()
+	if err != nil {
+		glog.Errorf("Failed to fetch topics : %v", err)
+		return
+	}
+	topic := topics[0]
+	glog.Infof("Subscriber topic is : %v", topic)
+	config, err := subCtx.GetMsgbusConfig()
+	if err != nil {
+		glog.Error("Failed to get message bus config :%v", err)
+		return
+	}
+	subclient, err = eiimsgbus.NewMsgbusClient(config)
+	if err != nil {
+		glog.Errorf("-- Error creating context: %v\n", err)
+		return
+	}
+	subscriber, err = subclient.NewSubscriber(topic)
+	if err != nil {
+		glog.Errorf("-- Error creating subscriber: %v\n", err)
+		return
+	}
+	for {
+		msg := <-subscriber.MessageChannel
+		bytemsg, err := json.Marshal(msg.Data)
+		if err != nil {
+			glog.Errorf("error: %s", err)
+		}
+		fmt.Println(bytemsg)
+		glog.Infof("Subscribe data received from topic: %s  Data: %v", msg.Name, msg.Data)
+	}
+}
+
+func writeToTDengine(msgData string) {
 
 }
 
