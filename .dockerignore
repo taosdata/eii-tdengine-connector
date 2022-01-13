@@ -12,6 +12,7 @@ inspectlog.sh
 .cache
 .bashhistory
 .config
+.python_history
 .git
 .env
 TDengineConnector

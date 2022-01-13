@@ -5,10 +5,10 @@ import (
 	eiimsgbus "EIIMessageBus/eiimsgbus"
 	"bytes"
 	"database/sql/driver"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
-	"json"
 	"os"
 	"strconv"
 	"strings"
@@ -116,7 +116,7 @@ func subscribeToTDengine(dbName string, stableName string) {
 }
 
 func startEIISubscriber() {
-	subCtx, err := cfgMgr.ConfigMgr.GetSubscriberByIndex(0)
+	subCtx, err := cfgMgr.GetSubscriberByIndex(0)
 	if err != nil {
 		glog.Errorf("Error occured with error:%v", err)
 		return
@@ -184,7 +184,7 @@ func main() {
 	}
 	glog.Infof("Start %s", appName)
 
-	go startEIIPublisher()
+	//go startEIIPublisher()
 	go startEIISubscriber()
 	<-done
 	glog.Info("do cleanup...")
