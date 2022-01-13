@@ -101,7 +101,7 @@ func subscribeToTDengine(dbName string, stableName string) {
 					continue
 				}
 				buf.WriteString("ts=")
-				ms := toMicroseconds(ts)
+				ms := ts.UnixNano() / 1000000
 				buf.WriteString(strconv.FormatInt(ms, 10))
 				buf.WriteString(" ")
 				for i, col := range cols[1:] {
@@ -148,7 +148,7 @@ func startEIISubscriber() {
 	for {
 		msg := <-subscriber.MessageChannel
 		// Data: map[metric:electric_meter tags:map[device_id:BJ-12345] timestamp:1 value:245]
-		msg.Data["timestamp"] = time.Now().Nanosecond() / 1000000
+		msg.Data["timestamp"] = time.Now().UnixNano() / 1000000
 		bytemsg, err := json.Marshal(msg.Data)
 		if err != nil {
 			glog.Errorf("error: %s", err)
@@ -168,7 +168,7 @@ func processMsg(bytemsg *[]byte) {
 	req.Header.Set("Authorization", "Basic cm9vdDp0YW9zZGF0YQ==")
 	resp, err := httpClient.Do(req)
 	if resp.StatusCode != 200 {
-		glog.Errof("processMsg resp: %d %s", resp.StatusCode, resp.Status)
+		glog.Errorf("processMsg resp: %d %s", resp.StatusCode, resp.Status)
 	}
 }
 
@@ -179,10 +179,6 @@ func cleanup() {
 	if publisher != nil {
 		publisher.Close()
 	}
-}
-
-func toMicroseconds(t time.Time) int64 {
-	return t.Unix()*1e3 + int64(t.Nanosecond()/1000000)
 }
 
 func main() {
@@ -198,7 +194,7 @@ func main() {
 	}
 	glog.Infof("Start %s", appName)
 
-	//go startEIIPublisher()
+	go startEIIPublisher()
 	go startEIISubscriber()
 	<-done
 	glog.Info("do cleanup...")
