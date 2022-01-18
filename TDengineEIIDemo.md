@@ -885,16 +885,27 @@ We see two URL patterns in above log:
 
 ### 4.12. Monitor Data via Grafana 
 Run Query: `show databases`
+
 ![](img/grafana_1.png)
+
 Run Query: `show eiidemo.stables`
+
 ![](img/grafana_2.png)
+
 Run Query: `describe eiidemo.point_data`
+
 ![](img/grafana_3.png)
+
 Run Query: `select ts,  temperature from eiidemo.point_data`
+
 ![](img/grafana_4.png)
+
 Run Query: `select * from eiidemo.electric_meter limit 10`
+
 ![](img/grafana_5.png)
+
 Run Query: `select ts, value from eiidemo.electric_meter where device_id = 'BJ-12345'`
+
 ![](img/grafana_6.png)
 
 ## 5. Improvement 
