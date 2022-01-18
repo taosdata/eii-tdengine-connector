@@ -1,0 +1,37 @@
+{
+    "config": {
+        "tdengine": {
+            "user": "root",
+            "password": "taosdata"
+        }
+    },
+    "interfaces": {
+        "Publishers": [
+            {
+                "AllowedClients": [
+                    "*"
+                ],
+                "EndPoint": "0.0.0.0:65040",
+                "Name": "PointData",
+                "Topics": [
+                    "eiidemo.point_data"
+                ],
+                "Type": "zmq_tcp"
+            }
+        ],
+        "Subscribers": [
+            {
+                "Name": "TestSub",
+                "Type": "zmq_tcp",
+                "EndPoint": "ia_zmq_broker:60515",
+                "Topics": [
+                    "topic-pfx1"
+                ],
+                "PublisherAppName": "*",
+                "AllowedClients": [
+                    "*"
+                ]
+            }
+        ]
+    }
+}
