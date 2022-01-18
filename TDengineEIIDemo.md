@@ -673,7 +673,8 @@ bo@vm1:~/eiiwork/IEdgeInsights/build$ docker-compose -f docker-compose-build.yml
 
 **Note**
 > Step 3.7 must follow step 3.6. The order is very important, because that in provision step, only AppNames appeared in `build/docker-compose.yml` will be included in etcd configurations like below:
-![](img/etcd_config.png)
+> 
+> ![](img/etcd_config.png)
 (http://eiivm:7070/etcdkeeper/)
 
 > The building process will take long time, you can comment out some images that do not need to rebuild.
@@ -913,6 +914,6 @@ Refine `TDengineConnector` image.
 
 ## 6. References
 
-[Install EII](https://open-edge-insights.github.io/pages/running.html)
-[EmbPublisher](https://open-edge-insights.github.io/pages/tools.html#how-to-integrate-this-tool-with-video-timeseries-use-case)
-[adding-new-eii-service](https://open-edge-insights.github.io/pages/eiiConfig.html#adding-new-eii-service-so-it-gets-picked-up-by-builder)
+- [Install EII](https://open-edge-insights.github.io/pages/running.html)
+- [EmbPublisher](https://open-edge-insights.github.io/pages/tools.html#how-to-integrate-this-tool-with-video-timeseries-use-case)
+- [adding-new-eii-service](https://open-edge-insights.github.io/pages/eiiConfig.html#adding-new-eii-service-so-it-gets-picked-up-by-builder)
