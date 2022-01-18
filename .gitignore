@@ -1,5 +1,4 @@
 .env
-*.deb
 .cache
 .bash_history
 .python_history
