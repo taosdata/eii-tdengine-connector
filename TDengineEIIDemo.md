@@ -107,7 +107,7 @@ bo@vm1:~/eiiwork/IEdgeInsights/tools/mqtt/publisher$ set +a
 bo@vm1:~/eiiwork/IEdgeInsights/tools/mqtt/publisher$ docker-compose build
 ```
 
-**Note:** MQTT Publisher is a standalone component and not is not governed by `build/docker-compose.yml`. So it can build separately, and all changes take effect immediately after rebuilding.
+**Note:** MQTT Publisher is a standalone component and is not governed by `build/docker-compose.yml`. So it can build separately, and all changes take effect immediately after rebuilding.
 
 #### 3.1.2 How to check
 
