@@ -545,7 +545,7 @@ bo@vm1:~/eiiwork/IEdgeInsights/build$ vi docker-compose.yml
 ### 3.6. Build and Integrate `TDengineConnector`
 #### 3.6.1 Clone
 ```bash
-bo@vm1:~$ git clone git@github.com:taosdata/eii-tdengine-connector.git
+bo@vm1:~$ git clone git@github.com:taosdata/eii-tdengine-connector.git --depth=1
 bo@vm1:~/eii-tdengine-connector$ ls
 build.sh  Dockerfile  driver-go-2.0.0  README.md  startup.sh 
 TDengineConnector.go  TDengine-server-2.3.5.0-beta-Linux-x64.deb
