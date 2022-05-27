@@ -1,2 +1,2 @@
 . .env
-docker build . -t taos/ia_tdengineconnector:0.0.1  --build-arg EII_VERSION=$EII_VERSION --build-arg CMAKE_INSTALL_PREFIX=$EII_INSTALL_PATH
+docker build . -t taos/ia_tdengineconnector:0.0.1  --build-arg EII_VERSION=$EII_VERSION --build-arg CMAKE_INSTALL_PREFIX=$EII_INSTALL_PATH --build-arg UBUNTU_IMAGE_VERSION=$UBUNTU_IMAGE_VERSION

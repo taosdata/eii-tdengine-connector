@@ -3,14 +3,16 @@
 ARG EII_VERSION
 ARG UBUNTU_IMAGE_VERSION
 ARG ARTIFACTS="/artifacts"
+ARG TDENGINE_VERSION
 FROM ia_common:${EII_VERSION} as common
 FROM ia_eiibase:${EII_VERSION} as builder
 LABEL description="TDengineConnector image"
-WORKDIR /root
-ADD . /root
+WORKDIR /eii
+ADD . /eii
 # Install TDengine
-RUN dpkg -i TDengine-server-2.3.5.0-beta-Linux-x64.deb
-RUN rm TDengine-server-2.3.5.0-beta-Linux-x64.deb
+ENV TDENGINE_PACKAGE="TDengine-server-2.4.0.20-Linux-x64.deb"
+RUN dpkg -i ${TDENGINE_PACKAGE}
+RUN rm ${TDENGINE_PACKAGE}
 
 # Install TDengine go driver 
 RUN mkdir -p ${GOPATH}/src/github.com/taosdata/driver-go/
@@ -36,9 +38,26 @@ ENV PATH="$PATH:/usr/local/go/bin" \
 ENV CGO_CFLAGS="$CGO_FLAGS -I ${CMAKE_INSTALL_PREFIX}/include -O2 -D_FORTIFY_SOURCE=2 -Werror=format-security -fstack-protector-strong -fPIC" \
     CGO_LDFLAGS="$CGO_LDFLAGS -L${CMAKE_INSTALL_PREFIX}/lib -z noexecstack -z relro -z now"
 
-WORKDIR /root
+WORKDIR /eii
 RUN go build TDengineConnector.go 
 
+FROM ubuntu:${UBUNTU_IMAGE_VERSION}
+ARG CMAKE_INSTALL_PREFIX
+WORKDIR /eii
+ENV TDENGINE_PACKAGE="TDengine-server-2.4.0.20-Linux-x64.deb"
+ADD ./${TDENGINE_PACKAGE} /eii
+RUN dpkg -i /eii/${TDENGINE_PACKAGE}
+RUN rm /eii/${TDENGINE_PACKAGE}
+COPY --from=builder /eii/startup.sh /eii/startup.sh
+COPY --from=builder /eii/TDengineConnector /eii/TDengineConnector
+COPY --from=common ${CMAKE_INSTALL_PREFIX}/lib/libeii*.so ${CMAKE_INSTALL_PREFIX}/lib/
+COPY --from=common ${CMAKE_INSTALL_PREFIX}/lib/libsafestring.so ${CMAKE_INSTALL_PREFIX}/lib/
+COPY --from=common ${CMAKE_INSTALL_PREFIX}/lib/libzmq.so.5 ${CMAKE_INSTALL_PREFIX}/lib/
+COPY --from=common ${CMAKE_INSTALL_PREFIX}/lib/lib*.so.1 ${CMAKE_INSTALL_PREFIX}/lib/
 EXPOSE 6030-6042/tcp 
 EXPOSE 6030-6042/udp 
+ENV PATH="$PATH:/usr/local/go/bin" \
+	PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" \
+	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CMAKE_INSTALL_PREFIX}/lib"
+RUN chmod a+x ./startup.sh
 ENTRYPOINT ["./startup.sh"]
