@@ -421,7 +421,7 @@ index 2e34876..57fc5d3 100755
  export GF_PATHS_PROVISIONING="/tmp/grafana/conf/provisioning"
  
 +grafana-cli --pluginsDir "$GF_PATHS_PLUGINS" \
-+           --pluginUrl https://github.com/taosdata/grafanaplugin/releases/download/v3.1.3/tdengine-datasource-3.1.3.zip \
++           --pluginUrl https://github.com/taosdata/grafanaplugin/releases/download/v3.1.7/tdengine-datasource-3.1.7.zip \
 +           plugins install tdengine-datasource;
 +
  echo "Copying the grafana configurations to /tmp"
@@ -447,7 +447,7 @@ export GF_PATHS_PLUGINS="/tmp/grafana/lib/grafana/plugins"
 export GF_PATHS_PROVISIONING="/tmp/grafana/conf/provisioning"
 
 grafana-cli --pluginsDir "$GF_PATHS_PLUGINS" \
-            --pluginUrl https://github.com/taosdata/grafanaplugin/releases/download/v3.1.3/tdengine-datasource-3.1.3.zip \
+            --pluginUrl https://github.com/taosdata/grafanaplugin/releases/download/v3.1.7/tdengine-datasource-3.1.7.zip \
             plugins install tdengine-datasource;
 
 echo "Copying the grafana configurations to /tmp"
@@ -473,8 +473,7 @@ fi
 ```
 
 #### 3.4.4. docker-compose.yml
-In this step, we add two environment variables to docker-compose.yml.
-We add `GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS` since tdengine-datasource was not signed.
+In this step, we add one environment variable to docker-compose.yml.
 ```git
 bo@vm1:~/eiiwork/IEdgeInsights/Grafana$ git diff docker-compose.yml
 diff --git a/docker-compose.yml b/docker-compose.yml
@@ -486,7 +485,6 @@ index 70b3560..6fa4cf8 100644
        INFLUX_SERVER: 'ia_influxdbconnector'
        GRAFANA_SERVER: '0.0.0.0'
 +      TDENGINE_SERVER: 'ia_tdengineconnector'
-+      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: tdengine-datasource
      networks:
 ```
 ```yml 
@@ -501,7 +499,6 @@ index 70b3560..6fa4cf8 100644
       INFLUX_SERVER: 'ia_influxdbconnector'
       GRAFANA_SERVER: '0.0.0.0'
       TDENGINE_SERVER: 'ia_tdengineconnector'
-      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: tdengine-datasource
 ```
 **Note:** The changes will not take effect until we run builder.py and provision and build again.
 
@@ -538,7 +535,6 @@ bo@vm1:~/eiiwork/IEdgeInsights/build$ vi docker-compose.yml
       INFLUX_SERVER: 'ia_influxdbconnector'
       GRAFANA_SERVER: '0.0.0.0'
       TDENGINE_SERVER: 'ia_tdengineconnector'
-      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: tdengine-datasource
 #...
 ```
 
@@ -732,7 +728,7 @@ Creating ia_opcua_export      ... done
 Make sure that tdengine-datasource is installed successfully.
 ```bash
 bo@vm1:~$ docker logs -f ia_grafana | head -20
-✔ Downloaded tdengine-datasource v3.1.3 zip successfully
+✔ Downloaded tdengine-datasource v3.1.7 zip successfully
 
 Please restart Grafana after installing plugins. Refer to Grafana documentation for instructions if necessary.
 
