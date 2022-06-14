@@ -1,0 +1,249 @@
+# Copyright (c) 2020 Intel Corporation.
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+version: '3.6'
+
+services:
+  ia_etcd_ui:
+    read_only: true
+    image: ${DOCKER_REGISTRY}openedgeinsights/ia_etcd_ui:${EII_VERSION}
+    container_name: ia_etcd_ui
+    hostname: ia_etcd_ui
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges
+    healthcheck:
+      test: ["CMD-SHELL", "exit", "0"]
+      interval: 5m
+    environment:
+      AppName: "EtcdUI"
+      DEV_MODE: ${DEV_MODE}
+      NGINX_PORT: 7071
+      CertType: "pem"
+      no_proxy: ${ETCD_HOST}
+      ETCD_HOST: ${ETCD_HOST}
+      ETCD_CLIENT_PORT: ${ETCD_CLIENT_PORT}
+      ETCD_PREFIX: ${ETCD_PREFIX}
+      ETCD_ENDPOINT: "$ETCD_HOST:$ETCD_CLIENT_PORT"
+    networks:
+      - eii
+    volumes:
+      - "vol_etcd_keeper:/opt/nginx"
+    ipc: "none"
+    ports:
+      - 7071:7071
+      - 7070:7070
+  ia_telegraf:
+    container_name: ia_telegraf
+    hostname: ia_telegraf
+    image: telegraf:${TELEGRAF_VERSION}
+    restart: unless-stopped
+    ipc: "none"
+    security_opt:
+      - no-new-privileges
+    read_only: true
+    healthcheck:
+      test: ["CMD-SHELL", "exit", "0"]
+      interval: 5m
+    environment:
+      AppName: "Telegraf"
+      CertType: "pem,zmq"
+      DEV_MODE: ${DEV_MODE}
+      no_proxy: "${ETCD_HOST},ia_tdengineconnector"
+      NO_PROXY: "${ETCD_HOST},ia_tdengineconnector"
+      ETCD_HOST: ${ETCD_HOST}
+      ETCD_CLIENT_PORT: ${ETCD_CLIENT_PORT}
+      MQTT_BROKER_HOST: 'ia_mqtt_broker'
+      TDENGINE_SERVER: 'ia_tdengineconnector'
+      ETCD_PREFIX: ${ETCD_PREFIX}
+    ports:
+      - 65077:65077
+    networks:
+      - eii
+    volumes:
+      - "vol_temp_telegraf:/tmp/"
+      - "vol_eii_socket:${SOCKET_DIR}"
+      - "./telegraf/config/telegraf.conf:/etc/telegraf/telegraf.conf:ro"
+  ia_tdengineconnector:
+    read_only: true
+    ipc: "none"
+    image: tdengine/ia_tdengineconnector:0.0.1
+    container_name: ia_tdengineconnector
+    hostname: ia_tdengineconnector
+    restart: unless-stopped
+    environment:
+      AppName: "TDengineConnector"
+      CertType: "zmq,pem"
+      DEV_MODE: ${DEV_MODE}
+      PROFILING_MODE: ${PROFILING_MODE}
+      no_proxy: "${ETCD_HOST},ia_grafana"
+      NO_PROXY: "${ETCD_HOST},ia_grafana"
+      ETCD_HOST: ${ETCD_HOST}
+      ETCD_CLIENT_PORT: ${ETCD_CLIENT_PORT}
+      ETCD_PREFIX: ${ETCD_PREFIX}
+    ports:
+      - 65040:65040
+    networks:
+      - eii
+    volumes:
+      - "vol_tdengine_data:/var/lib/taos"
+      - "vol_tdengine_log:/var/log/taos"
+      - "vol_temp_tdengine:/tmp"
+
+  ia_grafana:
+    image: tdengine/ia_grafana:${EII_VERSION}
+    container_name: ia_grafana
+    hostname: ia_grafana
+    read_only: true
+    restart: unless-stopped
+    ipc: "none"
+    security_opt:
+      - no-new-privileges
+    healthcheck:
+      test: ["CMD-SHELL", "exit", "0"]
+      interval: 5m
+    environment:
+      AppName: "Grafana"
+      CertType: "pem"
+      DEV_MODE: ${DEV_MODE}
+      no_proxy: "${ETCD_HOST},ia_tdengineconnector"
+      NO_PROXY: "${ETCD_HOST},ia_tdengineconnector"
+      ETCD_HOST: ${ETCD_HOST}
+      ETCD_PREFIX: ${ETCD_PREFIX}
+      TDENGINE_SERVER: 'ia_tdengineconnector'
+      GRAFANA_SERVER: '0.0.0.0'
+      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: tdengine-datasource
+    networks:
+      - eii
+    volumes:
+      - "vol_temp_grafana:/tmp"
+    ports:
+      - "$GRAFANA_PORT:$GRAFANA_PORT"
+  ia_zmq_broker:
+    read_only: true
+    image: ${DOCKER_REGISTRY}openedgeinsights/ia_zmq_broker:${EII_VERSION}
+    container_name: ia_zmq_broker
+    hostname: ia_zmq_broker
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges
+    healthcheck:
+      test: ["CMD-SHELL", "exit", "0"]
+      interval: 5m
+    environment:
+      AppName: "ZmqBroker"
+      CertType: "zmq"
+      DEV_MODE: ${DEV_MODE}
+      no_proxy: ${ETCD_HOST}
+      ETCD_HOST: ${ETCD_HOST}
+      ETCD_CLIENT_PORT: ${ETCD_CLIENT_PORT}
+      ETCD_PREFIX: ${ETCD_PREFIX}
+    ports:
+      - 60514:60514
+      - 60515:60515
+    networks:
+      - eii
+    volumes:
+      - "vol_eii_socket:${SOCKET_DIR}"
+  emb_publisher:
+    image: waynefeng/emb_publisher:${EII_VERSION}
+    container_name: emb_publisher
+    hostname: emb_publisher
+    environment:
+      AppName: "EmbPublisher"
+      DEV_MODE: ${DEV_MODE}
+      no_proxy: ${ETCD_HOST}
+      ETCD_HOST: ${ETCD_HOST}
+      ETCD_CLIENT_PORT: ${ETCD_CLIENT_PORT}
+      ETCD_PREFIX: ${ETCD_PREFIX}
+      CertType: "zmq"
+    networks:
+      - eii
+    volumes:
+      - "vol_eii_socket:${SOCKET_DIR}"
+  mqtt:
+    image: eclipse-mosquitto:2.0
+    container_name: ia_mqtt_broker
+    volumes:
+      - ./mosquitto/config:/mosquitto/config:ro
+    ports:
+      - 1883:1883
+    networks:
+        - eii
+  virtualdev:
+    image: waynefeng/pht_sensor:0.7
+    container_name: virtdev01
+    entrypoint: ["/app/pht_sensor", "-broker", "tcp://ia_mqtt_broker:1883", "-count", "0" ]
+    networks:
+      - eii
+    depends_on:
+      - mqtt
+networks:
+  eii:
+    external:
+      name: eii
+
+volumes:
+  vol_eii_socket:
+    driver: local
+    driver_opts:
+      type: local
+      o: bind
+      device: ${EII_INSTALL_PATH}/sockets
+
+  vol_etcd_keeper:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+
+  vol_temp_telegraf:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      o: "size=5K"
+      device: tmpfs
+
+  vol_tdengine_data:
+    driver: local
+    driver_opts:
+      type: local
+      o: bind
+      device: ${EII_INSTALL_PATH}/taos/data
+
+  vol_tdengine_log:
+    driver: local
+    driver_opts:
+      type: local
+      o: bind
+      device: ${EII_INSTALL_PATH}/taos/log
+
+  vol_temp_tdengine:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+
+  vol_temp_grafana:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+
