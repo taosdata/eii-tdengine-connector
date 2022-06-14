@@ -1,0 +1,138 @@
+{
+    "/EmbPublisher/config": {
+        "interval": "500ms",
+        "iteration": 1000000,
+        "msg_file": "data1k.json",
+        "pub_name": "TestPub"
+    },
+    "/EmbPublisher/interfaces": {
+        "Publishers": [
+            {
+                "AllowedClients": [
+                    "*"
+                ],
+                "BrokerAppName": "ZmqBroker",
+                "EndPoint": "ia_zmq_broker:60514",
+                "Name": "TestPub",
+                "Topics": [
+                    "topic-pfx1",
+                    "topic-pfx2",
+                    "topic-pfx3",
+                    "topic-pfx4"
+                ],
+                "Type": "zmq_tcp",
+                "brokered": true
+            }
+        ]
+    },
+    "/EtcdUI/config": {},
+    "/EtcdUI/interfaces": {},
+    "/GlobalEnv/": {
+        "C_LOG_LEVEL": "INFO",
+        "ETCD_KEEPER_PORT": "7070",
+        "GO_LOG_LEVEL": "INFO",
+        "GO_VERBOSE": "0",
+        "PY_LOG_LEVEL": "INFO"
+    },
+    "/Grafana/config": {
+        "influxdb": {
+            "dbname": "datain",
+            "password": "admin123",
+            "username": "admin"
+        }
+    },
+    "/Grafana/interfaces": {},
+    "/TDengineConnector/config": {
+        "tdengine": {
+            "password": "taosdata",
+            "user": "root"
+        }
+    },
+    "/TDengineConnector/interfaces": {
+        "Publishers": [
+            {
+                "AllowedClients": [
+                    "*"
+                ],
+                "EndPoint": "0.0.0.0:65040",
+                "Name": "PointData",
+                "Topics": [
+                    "eiidemo.point_data"
+                ],
+                "Type": "zmq_tcp"
+            }
+        ],
+        "Subscribers": [
+            {
+                "AllowedClients": [
+                    "*"
+                ],
+                "EndPoint": "ia_zmq_broker:60515",
+                "Name": "TestSub",
+                "PublisherAppName": "*",
+                "Topics": [
+                    "topic-pfx1"
+                ],
+                "Type": "zmq_tcp"
+            }
+        ]
+    },
+    "/Telegraf/config": {
+        "influxdb": {
+            "dbname": "datain",
+            "password": "admin123",
+            "username": "admin"
+        },
+        "publisher": {
+            "measurements": [
+                "*"
+            ],
+            "profiling": "false"
+        }
+    },
+    "/Telegraf/interfaces": {
+        "Publishers": [
+            {
+                "AllowedClients": [
+                    "*"
+                ],
+                "EndPoint": "0.0.0.0:65077",
+                "Name": "publisher",
+                "Topics": [
+                    "*"
+                ],
+                "Type": "zmq_tcp"
+            }
+        ]
+    },
+    "/ZmqBroker/config": {},
+    "/ZmqBroker/interfaces": {
+        "Publishers": [
+            {
+                "AllowedClients": [
+                    "*"
+                ],
+                "EndPoint": "0.0.0.0:60515",
+                "Name": "backend",
+                "Topics": [
+                    "*"
+                ],
+                "Type": "zmq_tcp"
+            }
+        ],
+        "Subscribers": [
+            {
+                "AllowedClients": [
+                    "*"
+                ],
+                "EndPoint": "0.0.0.0:60514",
+                "Name": "frontend",
+                "PublisherAppName": "*",
+                "Topics": [
+                    "*"
+                ],
+                "Type": "zmq_tcp"
+            }
+        ]
+    }
+}
