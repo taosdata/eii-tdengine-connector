@@ -259,7 +259,6 @@ index b331c10..79f8e21 100644
 +  username = "root"
 +  password = "taosdata"
 +  data_format = "influx"
-+  influx_max_line_bytes = 250
 +
 ```
 
@@ -271,7 +270,6 @@ index b331c10..79f8e21 100644
   username = "root" 
   password = "taosdata"
   data_format = "influx"
-  influx_max_line_bytes = 250
 ```
 
 #### 3.3.2. docker-compose.yml
